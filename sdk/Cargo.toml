@@ -1,0 +1,36 @@
+[package]
+name = "enkel-module-sdk"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+[features]
+appkit = ["dep:objc2", "dep:objc2-app-kit", "dep:objc2-foundation"]
+
+[dependencies]
+objc2-foundation = { workspace = true, optional = true }
+objc2 = { workspace = true, optional = true }
+objc2-app-kit = { workspace = true, optional = true }
+serde.workspace = true
+
+[lints.rust]
+deprecated = "deny"
+unsafe_op_in_unsafe_fn = "deny"
+unused_unsafe = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+undocumented_unsafe_blocks = "deny"
+excessive_nesting = "deny"
+cognitive_complexity = "deny"
+too_many_lines = "deny"
+manual_let_else = "deny"
+needless_else = "deny"
+match_same_arms = "deny"
+redundant_closure_for_method_calls = "deny"
+allow_attributes = "deny"
+allow_attributes_without_reason = "deny"
+
+[build-dependencies]
+enkel-module-build = { path = "../build-support" }

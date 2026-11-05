@@ -1,0 +1,11 @@
+[package]
+name = "enkel-module-build"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+autotests = false
+[dependencies]
+proc-macro2 = { version = "=1.0.107", features = ["span-locations"] }
+syn = { version = "=3.0.9", features = ["full", "visit"] }

@@ -1,0 +1,10 @@
+/target/
+/dist/
+*.p12
+*.p8
+*.keychain-db
+.DS_Store
+
+__pycache__/
+*.pyc
+/catalog-update.json
