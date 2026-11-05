@@ -27,6 +27,17 @@ cargo build --locked -p enkel-module-console
 
 Every module's build checks the 600-line source limit, purpose comments, function spacing and guard clauses. Native UI and protocol owners use flat files. Tests live in each project's flat `tests/` directory and are included privately by their owning source modules.
 
+## Local source installation (no paid Apple account)
+
+Public release requirements do not prevent local development. Build the browser's debug bundle with your existing stable development certificate, quit Enkel normally, then run:
+
+```sh
+python3 scripts/develop.py --profile /absolute/path/to/development-profile \
+  --identity YOUR_EXISTING_CERTIFICATE_SHA1
+```
+
+The command compiles these projects and installs actual source-built bundles into the selected profile. It refuses to replace code in a running browser and never downloads binary packages. Launch the local browser with `ENKEL_DEVELOPMENT_MODULES=1` and `ENKEL_PROFILE` pointing to that same profile. Both the explicit launch flag and the certificate embedded by the local debug build are required. The browser checks that certificate, bundle identity, architecture/ABI and absence of quarantine on every source-built package entry. Downloaded/quarantined code must still use the official release path. No quarantine attributes are removed and no system security settings are changed.
+
 ## Distribution and trust
 
 `catalog.json` contains **only published, signed and notarized releases**. Its initially empty state is intentional: development signatures must not be presented as official installable releases.
