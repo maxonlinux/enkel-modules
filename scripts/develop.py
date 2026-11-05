@@ -2,7 +2,6 @@
 """Build local source modules and install them into an explicitly selected development profile without an Apple paid account."""
 import argparse
 import json
-import os
 from pathlib import Path
 import re
 import shutil
@@ -71,7 +70,7 @@ def main():
             run("/usr/bin/codesign", "--verify", "--strict", "-R", requirement, str(path))
             for file in [path, *path.rglob("*")]:
                 # Local development must not remove or reinterpret quarantine from downloaded executables.
-                if "com.apple.quarantine" in os.listxattr(file):
+                if "com.apple.quarantine" in run("/usr/bin/xattr", str(file), capture=True).splitlines():
                     raise RuntimeError(f"Expected a fresh local build, found quarantined output: {file}")
             paths.append(path)
         directory = args.profile.resolve() / "Modules"

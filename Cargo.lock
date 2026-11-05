@@ -56,34 +56,26 @@ dependencies = [
 name = "enkel-module-console"
 version = "0.2.0"
 dependencies = [
- "base64",
- "block2",
  "enkel-module-build",
  "enkel-module-sdk",
  "objc2",
  "objc2-app-kit",
  "objc2-foundation",
  "objc2-quartz-core",
- "serde",
  "serde_json",
- "url",
 ]
 
 [[package]]
 name = "enkel-module-elements"
 version = "0.2.0"
 dependencies = [
- "base64",
- "block2",
  "enkel-module-build",
  "enkel-module-sdk",
  "objc2",
  "objc2-app-kit",
  "objc2-foundation",
  "objc2-quartz-core",
- "serde",
  "serde_json",
- "url",
 ]
 
 [[package]]
@@ -97,8 +89,6 @@ dependencies = [
  "objc2",
  "objc2-app-kit",
  "objc2-foundation",
- "objc2-quartz-core",
- "serde",
  "serde_json",
  "url",
 ]

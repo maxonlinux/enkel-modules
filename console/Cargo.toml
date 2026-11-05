@@ -10,15 +10,12 @@ autotests = false
 crate-type = ["cdylib"]
 [dependencies]
 enkel-module-sdk = { path = "../sdk", features = ["appkit"] }
-base64 = "0.23.1"
-block2.workspace = true
 objc2.workspace = true
 objc2-foundation.workspace = true
 objc2-app-kit.workspace = true
-objc2-quartz-core.workspace = true
-serde.workspace = true
+# Completion popups use CALayer geometry/color methods even though their type is returned by AppKit.
+objc2-quartz-core = { version = "0.3.2", default-features = false, features = ["std", "CALayer", "objc2-core-foundation", "objc2-core-graphics"] }
 serde_json.workspace = true
-url.workspace = true
 
 [lints.rust]
 deprecated = "deny"

@@ -10,15 +10,11 @@ autotests = false
 crate-type = ["cdylib"]
 [dependencies]
 enkel-module-sdk = { path = "../sdk", features = ["appkit"] }
-base64 = "0.23.1"
-block2.workspace = true
 objc2.workspace = true
 objc2-foundation.workspace = true
 objc2-app-kit.workspace = true
 objc2-quartz-core.workspace = true
-serde.workspace = true
 serde_json.workspace = true
-url.workspace = true
 
 [lints.rust]
 deprecated = "deny"

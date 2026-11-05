@@ -15,8 +15,6 @@ block2.workspace = true
 objc2.workspace = true
 objc2-foundation.workspace = true
 objc2-app-kit.workspace = true
-objc2-quartz-core.workspace = true
-serde.workspace = true
 serde_json.workspace = true
 url.workspace = true
 
