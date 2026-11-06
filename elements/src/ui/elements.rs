@@ -46,15 +46,17 @@ impl ElementsView {
         let view = NSView::new(mtm());
         view.setTranslatesAutoresizingMaskIntoConstraints(false);
         host.addSubview(&view);
+        // The shared search ends at 66 pt; the pane boundary must reach from that edge to the widget bottom.
+        // Keep spacing inside pane controls rather than shortening the split container and its divider.
         activate(vec![
             view.topAnchor()
-                .constraintEqualToAnchor_constant(&host.topAnchor(), 74.),
+                .constraintEqualToAnchor_constant(&host.topAnchor(), 66.),
             view.leadingAnchor()
                 .constraintEqualToAnchor_constant(&host.leadingAnchor(), 1.),
             view.trailingAnchor()
                 .constraintEqualToAnchor_constant(&host.trailingAnchor(), -1.),
             view.bottomAnchor()
-                .constraintEqualToAnchor_constant(&host.bottomAnchor(), -8.),
+                .constraintEqualToAnchor(&host.bottomAnchor()),
         ]);
         let table = tree::table(&delegate);
         let previous = button(
