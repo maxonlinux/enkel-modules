@@ -46,7 +46,7 @@ dependencies = [
 
 [[package]]
 name = "enkel-module-build"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "proc-macro2",
  "syn",
@@ -54,9 +54,8 @@ dependencies = [
 
 [[package]]
 name = "enkel-module-console"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
- "block2",
  "enkel-module-build",
  "enkel-module-sdk",
  "objc2",
@@ -68,7 +67,7 @@ dependencies = [
 
 [[package]]
 name = "enkel-module-elements"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "block2",
  "enkel-module-build",
@@ -82,7 +81,7 @@ dependencies = [
 
 [[package]]
 name = "enkel-module-network"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "base64",
  "block2",
@@ -97,7 +96,7 @@ dependencies = [
 
 [[package]]
 name = "enkel-module-sdk"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "enkel-module-build",
  "objc2",
