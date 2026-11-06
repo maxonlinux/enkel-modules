@@ -1,4 +1,4 @@
-name: Publish notarized modules
+name: Publish native modules
 on:
   workflow_dispatch:
     inputs:
@@ -13,7 +13,6 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
-    environment: release
     runs-on: macos-15
     strategy:
       fail-fast: true
@@ -37,45 +36,18 @@ jobs:
       - run: cargo fmt --all -- --check
       - run: cargo clippy --locked --workspace --all-targets -- -D warnings
       - run: cargo test --locked --workspace --all-targets
-      - name: Import release credentials into an ephemeral keychain
+      - name: Build and seal native packages without signing credentials
         env:
-          CERTIFICATE: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
-          CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.RELEASE_KEYCHAIN_PASSWORD }}
-          NOTARY_KEY: ${{ secrets.NOTARY_API_KEY_BASE64 }}
-          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
-          NOTARY_ISSUER: ${{ secrets.NOTARY_ISSUER_ID }}
-        run: |
-          test -n "$CERTIFICATE" && test -n "$NOTARY_KEY" && test -n "$KEYCHAIN_PASSWORD"
-          printf '%s' "$CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/release.p12"
-          printf '%s' "$NOTARY_KEY" | base64 --decode > "$RUNNER_TEMP/notary.p8"
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/release.keychain-db"
-          security set-keychain-settings -lut 21600 "$RUNNER_TEMP/release.keychain-db"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/release.keychain-db"
-          security import "$RUNNER_TEMP/release.p12" -P "$CERTIFICATE_PASSWORD" -k "$RUNNER_TEMP/release.keychain-db" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -k "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/release.keychain-db"
-          security list-keychains -d user -s "$RUNNER_TEMP/release.keychain-db" login.keychain-db
-          xcrun notarytool store-credentials enkel-modules --key "$RUNNER_TEMP/notary.p8" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER" --keychain "$RUNNER_TEMP/release.keychain-db"
-      - name: Build, sign and notarize every module
-        env:
-          SIGNING_IDENTITY: ${{ vars.DEVELOPER_ID_APPLICATION }}
-          PUBLISHER_TEAM: ${{ vars.APPLE_TEAM_ID }}
           RELEASE_TAG: ${{ inputs.tag }}
-        run: python3 scripts/release.py --tag "$RELEASE_TAG" --target '${{ matrix.target }}' --identity "$SIGNING_IDENTITY" --team "$PUBLISHER_TEAM" --notary-profile enkel-modules
+        run: python3 scripts/release.py --tag "$RELEASE_TAG" --target '${{ matrix.target }}'
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: modules-${{ matrix.target }}
           path: dist/${{ matrix.target }}/*
           if-no-files-found: error
           retention-days: 3
-      - name: Remove signing material
-        if: always()
-        run: |
-          security delete-keychain "$RUNNER_TEMP/release.keychain-db" || true
-          rm -f "$RUNNER_TEMP/release.p12" "$RUNNER_TEMP/notary.p8"
   publish:
     needs: build
-    environment: release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -89,11 +61,11 @@ jobs:
           pattern: modules-*
           path: dist/release
           merge-multiple: true
-      - name: Publish approved artifacts before updating the catalog
+      - name: Publish complete artifacts before updating the catalog
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          gh release create "$RELEASE_TAG" dist/release/*.tar --verify-tag --title "Native modules $RELEASE_TAG" --generate-notes
+          gh release create "$RELEASE_TAG" dist/release/*.tar --verify-tag --title "Native modules $RELEASE_TAG" --generate-notes --prerelease
           python3 scripts/catalog.py dist/release
           gh api --method PUT repos/maxonlinux/enkel-modules/contents/catalog.json --input catalog-update.json

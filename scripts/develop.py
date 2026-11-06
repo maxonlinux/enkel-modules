@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""Build local source modules and install them into an explicitly selected development profile without an Apple paid account."""
+"""Build local source modules and install sealed native packages into an explicitly selected browser profile."""
 import argparse
 import json
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import tempfile
 
-from release import ROOT, TOOLS, bundle, run
+from release import ROOT, TOOLS, bundle, run, seal
 
 
 def install(path, directory):
@@ -41,18 +40,14 @@ def install(path, directory):
 
 
 def main():
-    """Compile this checkout, sign it with the developer's existing certificate and install into an offline development profile."""
+    """Compile this checkout and install modules with the same account-free seals used by releases."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", type=Path, required=True, help="Explicit browser profile; use a separate development profile")
-    parser.add_argument("--identity", required=True, help="Certificate SHA-1 also declared by the local browser debug build")
     parser.add_argument("--module", choices=TOOLS, action="append")
     args = parser.parse_args()
     # Never rewrite a library which a running AppKit process may still have registered classes from.
     if subprocess.run(["/usr/bin/pgrep", "-x", "Enkel"], stdout=subprocess.DEVNULL).returncode != 1:
         parser.error("Quit Enkel normally before replacing development modules")
-    # A real local developer certificate provides stable ownership without pretending to be a notarized public release.
-    if not re.fullmatch(r"[A-Fa-f0-9]{40}", args.identity):
-        parser.error("Expected a code-signing certificate SHA-1; ad-hoc signatures are not accepted")
     metadata = json.loads(run("cargo", "metadata", "--locked", "--no-deps", "--format-version", "1", capture=True))
     version = next(p["version"] for p in metadata["packages"] if p["name"] == "enkel-module-sdk")
     target = next(line.split(": ", 1)[1] for line in run("rustc", "-vV", capture=True).splitlines() if line.startswith("host: "))
@@ -65,9 +60,7 @@ def main():
         for tool in modules:
             run("cargo", "build", "--locked", "--release", "--target", target, "-p", f"enkel-module-{tool}")
             path, _ = bundle(tool, target, version, work)
-            run("/usr/bin/codesign", "--force", "--timestamp=none", "--sign", args.identity, str(path))
-            requirement = f'=certificate leaf = H"{args.identity}" and identifier = "{path.stem}"'
-            run("/usr/bin/codesign", "--verify", "--strict", "-R", requirement, str(path))
+            seal(path)
             for file in [path, *path.rglob("*")]:
                 # Local development must not remove or reinterpret quarantine from downloaded executables.
                 if "com.apple.quarantine" in run("/usr/bin/xattr", str(file), capture=True).splitlines():
@@ -77,7 +70,7 @@ def main():
         directory.mkdir(parents=True, exist_ok=True)
         for path in paths:
             install(path, directory)
-    print("Installed local source modules. Launch the local debug browser with ENKEL_DEVELOPMENT_MODULES=1 and this profile.")
+    print("Installed native modules. Launch Enkel with the selected profile.")
 
 
 if __name__ == "__main__":

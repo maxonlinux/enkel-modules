@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate an atomic GitHub catalog update after all signed release assets have been published."""
+"""Generate an atomic GitHub catalog update after all verified native release assets have been published."""
 import base64
 import hashlib
 import json
@@ -24,14 +24,14 @@ def main():
             for chunk in iter(lambda: source.read(1024 * 1024), b""):
                 value.update(chunk)
             checksum = value.hexdigest()
-        # Artifact transfer must preserve the approved archive bytes and their bounded metadata.
+        # Artifact transfer must preserve the verified archive bytes and their bounded metadata.
         if checksum != record["sha256"] or archive.stat().st_size != record["bytes"]:
             raise ValueError(f"Release artifact changed: {archive}")
     result = subprocess.run(["gh", "api", "repos/maxonlinux/enkel-modules/contents/catalog.json"], check=True, capture_output=True, text=True)
     previous = json.loads(result.stdout)
     catalog = json.loads(base64.b64decode(previous["content"]))
     catalog["modules"] = [entry for entry in catalog["modules"] if (entry["manifest"]["id"], entry["manifest"]["architecture"]) not in identities] + records
-    body = dict(message="Publish approved module release catalog", sha=previous["sha"],
+    body = dict(message="Publish module release catalog", sha=previous["sha"],
                 content=base64.b64encode((json.dumps(catalog, indent=2) + "\n").encode()).decode())
     Path("catalog-update.json").write_text(json.dumps(body))
 

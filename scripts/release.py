@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build independent native bundles; publish artifacts only after Developer ID signing and Apple notarization."""
+"""Build independent native bundles with account-free code-integrity seals and reproducible release metadata."""
 import argparse
 import hashlib
 import json
@@ -50,29 +50,14 @@ def bundle(tool, target, version, destination):
     return path, manifest
 
 
-def approve(path, identity, team, profile, work):
-    """Require a real Developer ID Application identity and accepted notarization before archiving a release."""
-    # Developer/deployment signatures cannot be substituted for public distribution trust.
-    if not identity.startswith("Developer ID Application:"):
-        raise ValueError("Release identity must be Developer ID Application")
-    run("/usr/bin/codesign", "--force", "--sign", identity, "--options", "runtime",
-        "--timestamp", str(path))
-    archive = work / (path.name + ".zip")
-    run("/usr/bin/ditto", "-c", "-k", "--keepParent", str(path), str(archive))
-    result = json.loads(run("xcrun", "notarytool", "submit", str(archive),
-                            "--keychain-profile", profile, "--wait", "--output-format", "json", capture=True))
-    # Rejected and in-progress submissions must never reach a release or its catalog entry.
-    if result.get("status") != "Accepted":
-        raise RuntimeError(f"Apple notarization was not accepted: {result.get('id')}")
-    requirement = (f'=anchor apple generic and certificate leaf[subject.OU] = "{team}" '
-                   'and certificate leaf[field.1.2.840.113635.100.6.1.13] exists '
-                   f'and identifier = "{path.stem}" and notarized')
-    run("/usr/bin/codesign", "--verify", "--strict", "--check-notarization", "-R", requirement, str(path))
-    archive.unlink()
+def seal(path):
+    """Apply an ad-hoc resource seal for native code integrity without a certificate or Apple account."""
+    run("/usr/bin/codesign", "--force", "--timestamp=none", "--sign", "-", str(path))
+    run("/usr/bin/codesign", "--verify", "--strict", str(path))
 
 
 def publishable(tool, target, tag, path, manifest, output):
-    """Archive only regular files/directories in POSIX format accepted by the bounded browser installer."""
+    """Archive only ordinary POSIX entries and record the exact bytes the browser must verify."""
     name = f"{tool}-{target.split('-')[0]}.tar"
     archive = output / name
     with tarfile.open(archive, "w", format=tarfile.USTAR_FORMAT) as tar:
@@ -93,17 +78,14 @@ def publishable(tool, target, tag, path, manifest, output):
 
 
 def main():
-    """Build a complete architecture's release using credentials stored in the system keychain."""
+    """Build all modules for one architecture without requiring publisher credentials."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", choices=["aarch64-apple-darwin", "x86_64-apple-darwin"], required=True)
     parser.add_argument("--tag", required=True)
-    parser.add_argument("--identity", required=True)
-    parser.add_argument("--team", required=True)
-    parser.add_argument("--notary-profile", required=True)
     args = parser.parse_args()
-    # Release tags and publisher metadata must be usable as stable catalog values and filenames.
-    if not re.fullmatch(r"v\d+\.\d+\.\d+", args.tag) or not re.fullmatch(r"[A-Z0-9]{10}", args.team):
-        parser.error("Expected a vMAJOR.MINOR.PATCH tag and ten-character Apple Team ID")
+    # Bound release tags before constructing catalog URLs and selecting project versions.
+    if not re.fullmatch(r"v\d+\.\d+\.\d+", args.tag):
+        parser.error("Expected a vMAJOR.MINOR.PATCH tag")
     version = args.tag[1:]
     metadata = json.loads(run("cargo", "metadata", "--no-deps", "--format-version", "1", capture=True))
     # A tag cannot relabel old compiled project versions as a newer published release.
@@ -119,7 +101,7 @@ def main():
     for tool in TOOLS:
         run("cargo", "build", "--locked", "--release", "--target", args.target, "-p", f"enkel-module-{tool}")
         path, manifest = bundle(tool, args.target, version, work)
-        approve(path, args.identity, args.team, args.notary_profile, work)
+        seal(path)
         publishable(tool, args.target, args.tag, path, manifest, output)
     shutil.rmtree(work)
 

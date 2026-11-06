@@ -27,51 +27,53 @@ cargo build --locked -p enkel-module-console
 
 Every module's build checks the 600-line source limit, purpose comments, function spacing and guard clauses. Native UI and protocol owners use flat files. Tests live in each project's flat `tests/` directory and are included privately by their owning source modules.
 
-## Local source installation (no paid Apple account)
+## Installation
 
-Public release requirements do not prevent local development. Build the browser's debug bundle with your existing stable development certificate, quit Enkel normally, then run:
+Open **Enkel > Modules** in the browser, select a repository and install the
+packages you want. Modules are downloaded as native bundles; users do not need
+Rust, Xcode or an Apple Developer account.
 
-```sh
-python3 scripts/develop.py --profile /absolute/path/to/development-profile \
-  --identity YOUR_EXISTING_CERTIFICATE_SHA1
-```
-
-The command compiles these projects and installs actual source-built bundles into the selected profile. It refuses to replace code in a running browser and never downloads binary packages. Launch the local browser with `ENKEL_DEVELOPMENT_MODULES=1` and `ENKEL_PROFILE` pointing to that same profile. Both the explicit launch flag and the certificate embedded by the local debug build are required. The browser checks that certificate, bundle identity, architecture/ABI and absence of quarantine on every source-built package entry. Downloaded/quarantined code must still use the official release path. No quarantine attributes are removed and no system security settings are changed.
-
-## Distribution and trust
-
-`catalog.json` contains **only published, signed and notarized releases**. Its initially empty state is intentional: development signatures must not be presented as official installable releases.
-
-Each `.enkelmodule` bundle contains `Contents/MacOS/Module`, its signed `Info.plist`, and `Contents/Resources/module.json` declaring capability, version, host requirement, architecture, ABI and build digest. Published assets are uncompressed POSIX `.tar` archives; symlinks, sparse files and extended archive records are excluded.
-
-The browser checks release length and SHA-256, metadata compatibility, the configured official Apple Team ID, **Developer ID Application** certificate type, code signature and notarization before invoking `NSBundle`. Quarantine remains intact. An Apple Development or Apple Distribution signature is insufficient for official public distribution.
-
-Notarization tickets for code bundles are verified online with `codesign --check-notarization`; generic code bundles cannot be treated as notarized applications merely by running `spctl --type execute`. See [Apple's notarization guidance](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution).
-
-## Release setup
-
-The `release` GitHub environment needs these variables:
-
-- `APPLE_TEAM_ID`: official ten-character publisher Team ID.
-- `DEVELOPER_ID_APPLICATION`: full Developer ID Application signing identity.
-
-Store credentials as GitHub **environment secrets**, never in source or chat:
-
-- `DEVELOPER_ID_P12_BASE64`, `DEVELOPER_ID_P12_PASSWORD`
-- `RELEASE_KEYCHAIN_PASSWORD`
-- `NOTARY_API_KEY_BASE64`, `NOTARY_KEY_ID`, `NOTARY_ISSUER_ID`
-
-Use a dedicated signing certificate and least-privilege notarization key. Protect the release environment with required reviewers and restrict deployment refs to reviewed release tags. The workflow imports credentials into an ephemeral keychain and removes it even after failure. Follow [GitHub's signing guidance](https://docs.github.com/en/actions/how-tos/deploy/deploy-to-third-party-platforms/sign-xcode-applications) and [Apple's Developer ID instructions](https://developer.apple.com/help/account/certificates/create-developer-id-certificates/).
-
-Set the same official Team ID in the browser build using `ENKEL_MODULE_TEAM_ID` or its ignored local `.module-team` file. This does not change the browser's stable development signing identity. A hardened distribution browser and its native modules must use a compatible signing team/library-validation policy.
-
-After updating the workspace version, create a reviewed `vMAJOR.MINOR.PATCH` tag on `main` and run **Publish notarized modules**. The workflow checks code, builds both supported architectures, signs every bundle, waits for Apple acceptance, verifies the tickets, uploads release assets, then atomically updates the catalog. Failed or incomplete builds cannot produce a catalog entry. The local equivalent is:
+For local source development, quit Enkel normally before replacing loaded code:
 
 ```sh
-python3 scripts/release.py --tag v0.2.0 --target aarch64-apple-darwin \
-  --identity 'Developer ID Application: Your Name (TEAMID)' \
-  --team YOURTEAMID --notary-profile enkel-modules
+python3 scripts/develop.py --profile /absolute/path/to/browser-profile
 ```
+
+Use a separate profile when testing. No development flag or signing certificate
+is required to use these modules.
+
+## Packages and trust
+
+Each `.enkelmodule` bundle contains its native library, `Info.plist` and a
+versioned `module.json` declaring its identity, architecture, host version, ABI
+and build digest. Archives use ordinary POSIX `.tar` entries.
+
+The browser checks repository-scoped download URLs, exact archive lengths,
+SHA-256, bundle identity, architecture, ABI and native code integrity. Packages
+use ad-hoc code seals that require no certificate or paid account. These seals
+detect changed files; they do not identify a publisher. Trust comes from the
+repository you choose, and modules execute inside the browser process.
+
+Quarantine metadata is preserved. The installer does not disable Gatekeeper,
+resign downloaded packages or change system security settings. macOS can still
+require its own approval for software imported from outside the catalog.
+
+## Publishing
+
+Create a `vMAJOR.MINOR.PATCH` tag from `main` matching the workspace version,
+then run **Publish native modules** in GitHub Actions. It builds both supported
+architectures, applies account-free resource seals, verifies the archives and
+publishes all six packages before updating `catalog.json`. No Apple signing
+credentials or notarization service are required.
+
+The local build command is:
+
+```sh
+python3 scripts/release.py --tag v0.2.0 --target aarch64-apple-darwin
+```
+
+A release must contain Console, Elements and Network for both supported
+architectures. The catalog updater rejects incomplete or modified artifacts.
 
 ## License
 
