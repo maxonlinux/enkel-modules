@@ -307,21 +307,35 @@ pub fn configure_code_input(view: &NSTextView) {
     view.setMaxSize(NSSize::new(f64::MAX, f64::MAX));
 }
 
-// SAFETY: Inherit AppKit's divider drawing, sizing and accessibility without overriding native painting.
+// SAFETY: Preserve NSSplitView tracking and sizing; the shared drawing selectors use AppKit's NSRect and retained NSColor ABI.
 
 define_class!(
     #[unsafe(super(NSSplitView))]
     pub struct DeveloperSplit;
     impl DeveloperSplit {
-        // Blend the divider with its panes while AppKit paints the native pane-splitter handle.
-        #[unsafe(method_id(dividerColor))]
-        fn divider_color(&self) -> Retained<NSColor> {
-            NSColor::textBackgroundColor()
+        // Match the browser's shared pane boundary: composite a neutral semantic stroke over an opaque native surface.
+        #[unsafe(method(drawDividerInRect:))]
+        fn draw_divider(&self, rect: NSRect) {
+            NSColor::windowBackgroundColor().setFill();
+            NSRectFill(rect);
+            self.dividerColor().setFill();
+            // Semantic strokes contain alpha; SourceOver preserves the opaque surface instead of copying transparent RGBA over it.
+            NSRectFillUsingOperation(rect, NSCompositingOperation::SourceOver);
         }
+
+        // A thin divider must lighten Dark Aqua and darken Aqua, rather than use NSSplitView's default white-pane contrast.
+        #[unsafe(method_id(dividerColor))]
+        fn divider_color(&self) -> Retained<NSColor> { NSColor::quaternaryLabelColor() }
     }
 );
 
 impl DeveloperSplit {
+    // All widget boundaries share a thin native divider; layouts own their orientation, minima and accessibility labels.
+    pub fn configure(split: &NSSplitView) {
+        split.setDividerStyle(NSSplitViewDividerStyle::Thin);
+        split.setClipsToBounds(true);
+    }
+
     // Keep a 16 pt native pointer target around the compact divider without reserving extra space.
     pub fn resize_area(split: &NSSplitView, mut drawn: NSRect) -> NSRect {
         // Extend only across the divider so the full pane boundary remains draggable.

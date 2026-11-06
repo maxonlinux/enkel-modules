@@ -122,9 +122,8 @@ impl ElementsLayout {
         // SAFETY: Initialize an allocated native split view once.
         let split: Retained<super::super::panels::DeveloperSplit> =
             unsafe { msg_send![super(object), init] };
-        split.setDividerStyle(NSSplitViewDividerStyle::PaneSplitter);
+        super::super::panels::DeveloperSplit::configure(&split);
         split.setAccessibilityLabel(Some(&text("Resize DOM and styles")));
-        split.setClipsToBounds(true);
         let tabs = ["DOM", "Styles"].map(tab_button);
         let more = inspector_menu(delegate);
         let object = Self::alloc(mtm()).set_ivars(LayoutIvars {

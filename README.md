@@ -69,7 +69,7 @@ credentials or notarization service are required.
 The local build command is:
 
 ```sh
-python3 scripts/release.py --tag v0.2.0 --target aarch64-apple-darwin
+python3 scripts/release.py --tag v0.2.1 --target aarch64-apple-darwin
 ```
 
 A release must contain Console, Elements and Network for both supported

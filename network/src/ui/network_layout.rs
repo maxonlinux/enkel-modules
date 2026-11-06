@@ -83,8 +83,7 @@ impl NetworkLayout {
         let object = DeveloperSplit::alloc(mtm()).set_ivars(());
         // SAFETY: Initialize the allocated inner split exactly once.
         let requests: Retained<DeveloperSplit> = unsafe { msg_send![super(object), init] };
-        requests.setDividerStyle(NSSplitViewDividerStyle::PaneSplitter);
-        requests.setClipsToBounds(true);
+        DeveloperSplit::configure(&requests);
         requests.setAccessibilityLabel(Some(&text("Resize requests and details")));
         requests.addArrangedSubview(list);
         details.setHidden(true);
@@ -95,8 +94,7 @@ impl NetworkLayout {
         });
         // SAFETY: Initialize the allocated outer split once, before installing its non-retaining delegates.
         let split: Retained<Self> = unsafe { msg_send![super(object), init] };
-        split.setDividerStyle(NSSplitViewDividerStyle::PaneSplitter);
-        split.setClipsToBounds(true);
+        DeveloperSplit::configure(&split);
         split.setAccessibilityLabel(Some(&text("Resize activity and requests")));
         split.addArrangedSubview(activity);
         split.addArrangedSubview(&split.ivars().requests);

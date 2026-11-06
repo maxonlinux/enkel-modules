@@ -38,6 +38,13 @@ pub fn symbol_configuration(size: f64) -> Retained<NSImageSymbolConfiguration> {
     NSImageSymbolConfiguration::configurationWithPointSize_weight(size, weight)
 }
 
+// Resolve the semantic editor color to a plain component fill so native tables cannot substitute a wallpaper-tinted material.
+pub fn plain_text_background() -> Retained<NSColor> {
+    NSColor::textBackgroundColor()
+        .colorUsingType(NSColorType::ComponentBased)
+        .unwrap_or_else(NSColor::textBackgroundColor)
+}
+
 // Use overlay indicators and clip content inside its owned scrolling region.
 pub fn configure_scroll(scroll: &NSScrollView) {
     // AppKit's clip views must not paint scrolled rows over headers or adjacent panes.

@@ -278,6 +278,14 @@ define_class!(
     #[ivars=DomTableIvars]
     struct DomTable;
     impl DomTable {
+        // Re-resolve the plain table fill when AppKit changes theme; semantic material colors must not pick up wallpaper tint.
+        #[unsafe(method(viewDidChangeEffectiveAppearance))]
+        fn appearance_changed(&self) {
+            // SAFETY: Preserve NSTableView's native appearance propagation before applying this table's solid background.
+            unsafe { let _: () = msg_send![super(self), viewDidChangeEffectiveAppearance]; }
+            self.refresh_background();
+        }
+
         // Present declared actions for the current panel or clicked DOM node.
         #[unsafe(method_id(menuForEvent:))]
         fn menu(&self, event: &NSEvent) -> Option<Retained<NSMenu>> {
@@ -308,6 +316,18 @@ define_class!(
     }
 );
 
+impl DomTable {
+    // Resolve the same component-based text background used by Network, within this view's effective drawing appearance.
+    fn refresh_background(&self) {
+        let update = block2::StackBlock::new(|| {
+            let background = plain_text_background();
+            self.setBackgroundColor(&background);
+        });
+        self.effectiveAppearance()
+            .performAsCurrentDrawingAppearance(&update);
+    }
+}
+
 // Create the DOM table with native scrolling, selection and editing delegates.
 pub(super) fn table(delegate: &ElementsDelegate) -> Retained<NSTableView> {
     let object = DomTable::alloc(mtm()).set_ivars(DomTableIvars {
@@ -318,7 +338,7 @@ pub(super) fn table(delegate: &ElementsDelegate) -> Retained<NSTableView> {
     table.setStyle(NSTableViewStyle::Plain);
     table.setRowHeight(23.);
     table.setIntercellSpacing(NSSize::new(0., 0.));
-    table.setBackgroundColor(&NSColor::textBackgroundColor());
+    table.refresh_background();
     table.setColumnAutoresizingStyle(NSTableViewColumnAutoresizingStyle::NoColumnAutoresizing);
     let column = NSTableColumn::initWithIdentifier(NSTableColumn::alloc(mtm()), &text("node"));
     column.setMaxWidth(f64::MAX);

@@ -51,9 +51,7 @@ impl RequestScroll {
     // Resolve the semantic text background into a plain fill so the table does not acquire a desktop-tinted material.
     pub(super) fn refresh_background(&self) {
         let update = block2::StackBlock::new(|| {
-            let background = NSColor::textBackgroundColor()
-                .colorUsingType(NSColorType::ComponentBased)
-                .unwrap_or_else(NSColor::textBackgroundColor);
+            let background = plain_text_background();
             self.setBackgroundColor(&background);
             // The scroll may receive its initial appearance before its document is attached.
             if let Some(table) = self
