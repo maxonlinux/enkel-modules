@@ -9,6 +9,7 @@ autotests = false
 [lib]
 crate-type = ["cdylib"]
 [dependencies]
+block2.workspace = true
 enkel-module-sdk = { path = "../sdk", features = ["appkit"] }
 objc2.workspace = true
 objc2-foundation.workspace = true

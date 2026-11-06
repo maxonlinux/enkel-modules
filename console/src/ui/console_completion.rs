@@ -3,6 +3,36 @@ use super::*;
 use crate::developer::Suggestions;
 use objc2::Message;
 use std::rc::Rc;
+
+// SAFETY: The main-thread scroll view preserves AppKit's void appearance callback and retains its own layer.
+define_class!(
+    #[unsafe(super(NSScrollView))]
+    struct CompletionScroll;
+    impl CompletionScroll {
+        // Native semantic colors update automatically; a CGColor border must be resolved again in the new appearance.
+        #[unsafe(method(viewDidChangeEffectiveAppearance))]
+        fn appearance_changed(&self) {
+            // SAFETY: Preserve NSScrollView's native appearance propagation before refreshing this owned layer.
+            unsafe { let _: () = msg_send![super(self), viewDidChangeEffectiveAppearance]; }
+            self.refresh_border();
+        }
+    }
+);
+impl CompletionScroll {
+    // Resolve only the border color here; native scrolling, drawing and geometry remain owned by NSScrollView.
+    fn refresh_border(&self) {
+        // Appearance can change before AppKit creates the backing layer or during native teardown.
+        let Some(layer) = self.layer() else {
+            return;
+        };
+        let update = block2::StackBlock::new(|| {
+            layer.setBorderColor(Some(&NSColor::separatorColor().CGColor()));
+        });
+        self.effectiveAppearance()
+            .performAsCurrentDrawingAppearance(&update);
+    }
+}
+
 #[derive(Default)]
 pub struct CompletionIvars {
     suggestions: RefCell<Option<Rc<Suggestions>>>,
@@ -122,7 +152,9 @@ impl CompletionPopup {
         let object = CompletionDelegate::alloc(mtm()).set_ivars(CompletionIvars::default());
         // SAFETY: Initialize the allocated NSObject subclass once.
         let delegate: Retained<CompletionDelegate> = unsafe { msg_send![super(object), init] };
-        let view = NSScrollView::new(mtm());
+        let object = CompletionScroll::alloc(mtm()).set_ivars(());
+        // SAFETY: Initialize this allocated NSScrollView subclass once before configuring its native layer and document.
+        let view: Retained<CompletionScroll> = unsafe { msg_send![super(object), init] };
         view.setHasVerticalScroller(true);
         view.setAutohidesScrollers(true);
         view.setWantsLayer(true);
@@ -131,8 +163,8 @@ impl CompletionPopup {
             layer.setCornerRadius(8.);
             layer.setBorderWidth(1.);
             layer.setMasksToBounds(true);
-            layer.setBorderColor(Some(&NSColor::separatorColor().CGColor()));
         }
+        view.refresh_border();
         view.setBorderType(NSBorderType::NoBorder);
         view.setBackgroundColor(&NSColor::windowBackgroundColor());
         let table = NSTableView::new(mtm());
@@ -187,7 +219,7 @@ impl CompletionPopup {
             height.clone(),
         ]);
         Self {
-            view,
+            view: view.into_super(),
             table,
             height,
             delegate,
