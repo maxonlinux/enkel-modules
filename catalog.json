@@ -4,79 +4,79 @@
     {
       "manifest": {
         "id": "dev.enkel.console",
-        "version": "0.2.2",
+        "version": "0.2.3",
         "host": "^0.2",
         "abi": 1,
         "architecture": "aarch64",
-        "build": "7872ce1f7ddaaba094128894ffa95b0e367a0d9f3133b0470aa40924c87a6d23"
+        "build": "352582418e5d5f0cce4c02c4650dff53fdb571b93492b1f24764514efd134f8b"
       },
-      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.2/console-aarch64.tar",
-      "sha256": "55eb0a40bdcaf99bc74f0d0ccaceb9822adaf21f9d57e52915747c8be0d2725c",
+      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.3/console-aarch64.tar",
+      "sha256": "8f6813cae4445dea7278c236ecf48d208835493d17d419d7d28f9f91d2cfb466",
       "bytes": 604160
     },
     {
       "manifest": {
         "id": "dev.enkel.console",
-        "version": "0.2.2",
+        "version": "0.2.3",
         "host": "^0.2",
         "abi": 1,
         "architecture": "x86_64",
-        "build": "0ddb050b7f1a6d1742285e71bee0bc6fb650fc1bb301a3dea7b66691e179c3d7"
+        "build": "24b06562c746c35a5287af9366a740f3c533035b79facb9c229f995b1a7c805f"
       },
-      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.2/console-x86_64.tar",
-      "sha256": "3016b63ff51d3b0a2bf684244857dd8ed2c861c657dee225cfedf6b4b0bb4d5c",
+      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.3/console-x86_64.tar",
+      "sha256": "004cbaeb6f72493bce61c8c6aaca7d1c6f10ebfbe0e617af6071371a203b52cc",
       "bytes": 624640
     },
     {
       "manifest": {
         "id": "dev.enkel.elements",
-        "version": "0.2.2",
+        "version": "0.2.3",
         "host": "^0.2",
         "abi": 1,
         "architecture": "aarch64",
-        "build": "7f64a801677525ec2db69946bcb60c501520e2b2beb869a7404aba21e2947b0b"
+        "build": "8bdd531b8d2c9f1d48845f1e95465a1deff700f86598a754b6949ce686f76ab3"
       },
-      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.2/elements-aarch64.tar",
-      "sha256": "9981980ed159003329756ad21089387310601cef18ef114b7a0d865ef3f87e70",
+      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.3/elements-aarch64.tar",
+      "sha256": "332532fe2203ed3887d9185c6fc0e79ee0361843799965508fa4378bb7bfd69d",
       "bytes": 778240
     },
     {
       "manifest": {
         "id": "dev.enkel.elements",
-        "version": "0.2.2",
+        "version": "0.2.3",
         "host": "^0.2",
         "abi": 1,
         "architecture": "x86_64",
-        "build": "0e2cddcb94814665946d018a630dd4163e8d52ca6290e4c84e359bc8065eca4c"
+        "build": "6470aaf291f2cc2371a9278d704e0a01ee6fdfb07d0f652f7c0e122dba70e3f6"
       },
-      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.2/elements-x86_64.tar",
-      "sha256": "a76b75e75a94f0677a8e41c89b74bca4e147e700f6247064a8afb93ba8723456",
+      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.3/elements-x86_64.tar",
+      "sha256": "7afaf15dd7144d9bb8d5c11058cda546fa326edb3943862ee010a426772576fe",
       "bytes": 798720
     },
     {
       "manifest": {
         "id": "dev.enkel.network",
-        "version": "0.2.2",
+        "version": "0.2.3",
         "host": "^0.2",
         "abi": 1,
         "architecture": "aarch64",
-        "build": "bde72f45249fca9a2b0db0a401a79c8d5036bb3b2cf85833d60f62ecc732c263"
+        "build": "2f10994692ec2dd020fb3b55c59add1f6615d573412c0925b4c99510f5b3e274"
       },
-      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.2/network-aarch64.tar",
-      "sha256": "573dcf1e13694de7bbf7cc7fb6c824ee2a77dd9aa6ece0f7b03f80147c98aa55",
+      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.3/network-aarch64.tar",
+      "sha256": "f7f5000ff8a63820ac3833c085d7b2a627576e822e87677c246294d45957ce9e",
       "bytes": 952320
     },
     {
       "manifest": {
         "id": "dev.enkel.network",
-        "version": "0.2.2",
+        "version": "0.2.3",
         "host": "^0.2",
         "abi": 1,
         "architecture": "x86_64",
-        "build": "c99ec5e2d18a0a472a2167414251211317abcdbef5329b1db927845e98f2c61e"
+        "build": "67ee2d1d4f210adb773bf89a0fa6de879746f9c8000d1a429b93e0a5cd3a044a"
       },
-      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.2/network-x86_64.tar",
-      "sha256": "6f4555cbe9009ebdf9799620d1d8f8ecf4db267d49ea5d8bc91d5c5e0e2e704b",
+      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.3/network-x86_64.tar",
+      "sha256": "8f1878d826a64463805a2041b0da5b81a252959fa7f059a186a462ec783937fd",
       "bytes": 962560
     }
   ]
