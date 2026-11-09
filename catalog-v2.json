@@ -78,32 +78,6 @@
       "url": "https://github.com/maxonlinux/enkel-modules/releases/download/v0.2.4/network-x86_64.tar",
       "sha256": "378370049cc39a1e87b8cd5487f84d4d7270a75449d26af6930365565696b6f2",
       "bytes": 962560
-    },
-    {
-      "manifest": {
-        "id": "dev.enkel.downloads",
-        "version": "0.1.0",
-        "host": "^0.2.1",
-        "abi": 1,
-        "architecture": "aarch64",
-        "build": "ec9013f74252c1bc61f2f22c4ad40bfd14d28ba2f766698a5ed3572990c27d78"
-      },
-      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/downloads-v0.1.0/downloads-aarch64.tar",
-      "sha256": "3337b83def9f43e78cfa7dd60024b7d9fd172c36b0636ed109dd11f5f68e6800",
-      "bytes": 419840
-    },
-    {
-      "manifest": {
-        "id": "dev.enkel.downloads",
-        "version": "0.1.0",
-        "host": "^0.2.1",
-        "abi": 1,
-        "architecture": "x86_64",
-        "build": "4e4d15f7979cac7bc01e2b449d1a14506a16d68056589e561ae7ed403ed585f1"
-      },
-      "url": "https://github.com/maxonlinux/enkel-modules/releases/download/downloads-v0.1.0/downloads-x86_64.tar",
-      "sha256": "b9c2a5918b762c02cfa16233e7f1fb03130889ffdd725389c540d3ff2b0567c5",
-      "bytes": 419840
     }
   ]
 }
