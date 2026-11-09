@@ -38,7 +38,9 @@ def bundle(tool, target, version, destination):
     (path / "Contents/Resources").mkdir()
     binary = path / "Contents/MacOS/Module"
     shutil.copy2(ROOT / f"target/{target}/release/libenkel_module_{tool}.dylib", binary)
-    manifest = dict(id=identity, version=version, host="^0.2", abi=1,
+    abi = int((ROOT / "sdk/ABI_VERSION").read_text())
+    host = "^0.2.1" if tool == "downloads" else "^0.2"
+    manifest = dict(id=identity, version=version, host=host, abi=abi,
                     architecture=target.split("-")[0], build=digest(binary))
     (path / "Contents/Resources/module.json").write_text(json.dumps(manifest, indent=2) + "\n")
     info = dict(CFBundleIdentifier=identity, CFBundleExecutable="Module",
@@ -82,14 +84,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", choices=["aarch64-apple-darwin", "x86_64-apple-darwin"], required=True)
     parser.add_argument("--tag", required=True)
+    parser.add_argument("--tool", choices=("downloads",))
     args = parser.parse_args()
     # Bound release tags before constructing catalog URLs and selecting project versions.
-    if not re.fullmatch(r"v\d+\.\d+\.\d+", args.tag):
-        parser.error("Expected a vMAJOR.MINOR.PATCH tag")
-    version = args.tag[1:]
+    prefix = f"{args.tool}-v" if args.tool else "v"
+    if not re.fullmatch(rf"{prefix}\d+\.\d+\.\d+", args.tag):
+        parser.error(f"Expected a {prefix}MAJOR.MINOR.PATCH tag")
+    version = args.tag.removeprefix(prefix)
+    tools = (args.tool,) if args.tool else TOOLS
     metadata = json.loads(run("cargo", "metadata", "--no-deps", "--format-version", "1", capture=True))
     # A tag cannot relabel old compiled project versions as a newer published release.
-    if any(p["version"] != version for p in metadata["packages"] if p["name"].startswith("enkel-module-")):
+    versions = {p["name"]: p["version"] for p in metadata["packages"]}
+    if any(versions[f"enkel-module-{tool}"] != version for tool in tools):
         parser.error("Release tag must match the workspace version")
     output = ROOT / "dist" / args.target
     # Refuse stale artifacts instead of mixing them into a newly approved release.
@@ -98,7 +104,7 @@ def main():
     output.mkdir(parents=True)
     work = output / "work"
     work.mkdir()
-    for tool in TOOLS:
+    for tool in tools:
         run("cargo", "build", "--locked", "--release", "--target", args.target, "-p", f"enkel-module-{tool}")
         path, manifest = bundle(tool, args.target, version, work)
         seal(path)

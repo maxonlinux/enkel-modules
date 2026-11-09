@@ -1,0 +1,24 @@
+[package]
+name = "enkel-module-downloads"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+enkel-module-sdk = { path = "../sdk", features = ["appkit"] }
+objc2.workspace = true
+objc2-app-kit.workspace = true
+serde_json.workspace = true
+
+[build-dependencies]
+enkel-module-build = { path = "../build-support" }
+
+[lints.rust]
+deprecated = "deny"
+unsafe_op_in_unsafe_fn = "deny"
+unused_unsafe = "deny"

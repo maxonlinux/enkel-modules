@@ -69,3 +69,7 @@ jobs:
           gh release create "$RELEASE_TAG" dist/release/*.tar --verify-tag --title "Native modules $RELEASE_TAG" --generate-notes --prerelease
           python3 scripts/catalog.py dist/release
           gh api --method PUT repos/maxonlinux/enkel-modules/contents/catalog.json --input catalog-update.json
+          v2_sha=$(gh api repos/maxonlinux/enkel-modules/contents/catalog-v2.json --jq .sha)
+          gh api --method PUT repos/maxonlinux/enkel-modules/contents/catalog-v2.json \
+            -f message="Update the compatible module catalog" -f sha="$v2_sha" \
+            -f content="$(base64 -w0 catalog-v2.json)"

@@ -14,7 +14,7 @@ jobs:
       - run: cargo +1.99.1 clippy --locked --workspace --all-targets -- -D warnings
       - name: Check each project independently of workspace feature unification
         run: |
-          for module in console network elements; do
+          for module in console network elements downloads; do
             cargo +1.99.1 check --locked --all-targets -p "enkel-module-$module"
           done
       - run: cargo +1.99.1 test --locked --workspace --all-targets

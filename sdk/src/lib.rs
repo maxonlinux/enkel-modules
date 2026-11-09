@@ -9,9 +9,15 @@ pub enum Tool {
     Console = 0,
     Network = 1,
     Elements = 2,
+    Downloads = 3,
 }
 impl Tool {
-    pub const ALL: [Self; 3] = [Self::Console, Self::Network, Self::Elements];
+    pub const ALL: [Self; 4] = [
+        Self::Console,
+        Self::Network,
+        Self::Elements,
+        Self::Downloads,
+    ];
 
     // Persist package identities independently of presentation names and native action tags.
     pub fn id(self) -> &'static str {
@@ -19,6 +25,7 @@ impl Tool {
             Self::Console => "dev.enkel.console",
             Self::Network => "dev.enkel.network",
             Self::Elements => "dev.enkel.elements",
+            Self::Downloads => "dev.enkel.downloads",
         }
     }
 
@@ -33,6 +40,7 @@ impl Tool {
             Self::Console => "Console",
             Self::Network => "Network",
             Self::Elements => "Elements",
+            Self::Downloads => "Downloads",
         }
     }
 
@@ -42,6 +50,7 @@ impl Tool {
             Self::Console => "Logs and JavaScript",
             Self::Elements => "DOM and CSS",
             Self::Network => "Requests and streams",
+            Self::Downloads => "File transfers from this browser session",
         }
     }
 
@@ -51,11 +60,28 @@ impl Tool {
             Self::Console => "terminal",
             Self::Elements => "chevron.left.forwardslash.chevron.right",
             Self::Network => "network",
+            Self::Downloads => "arrow.down.circle",
         }
     }
 }
 
-pub const ABI_VERSION: u32 = 1;
+pub const ABI_VERSION: u32 = include!("../ABI_VERSION");
+// Describe one host-owned transfer without exposing CEF handles or local paths.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Download {
+    pub name: String,
+    pub status: DownloadStatus,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum DownloadStatus {
+    Waiting,
+    Progress(i32),
+    Complete,
+    Cancelled,
+    Failed,
+}
+
 pub const MAX_MESSAGE: usize = 16 * 1024 * 1024;
 
 #[repr(C)]
@@ -126,6 +152,7 @@ pub mod event {
     pub const DISMISS: u32 = 13;
     pub const LAYOUT: u32 = 14;
     pub const FOCUS: u32 = 15;
+    pub const DOWNLOADS: u32 = 16;
 }
 pub mod notice {
     pub const STATUS: u32 = 1;

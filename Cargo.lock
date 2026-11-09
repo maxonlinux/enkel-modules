@@ -66,6 +66,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "enkel-module-downloads"
+version = "0.1.0"
+dependencies = [
+ "enkel-module-build",
+ "enkel-module-sdk",
+ "objc2",
+ "objc2-app-kit",
+ "serde_json",
+]
+
+[[package]]
 name = "enkel-module-elements"
 version = "0.2.4"
 dependencies = [
@@ -96,7 +107,7 @@ dependencies = [
 
 [[package]]
 name = "enkel-module-sdk"
-version = "0.2.4"
+version = "0.3.0"
 dependencies = [
  "enkel-module-build",
  "objc2",
